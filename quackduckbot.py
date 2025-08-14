@@ -1,12 +1,31 @@
 import os
 from dotenv import load_dotenv
-from telegram import Update
+from telegram import (
+    Update,
+    ReplyKeyboardMarkup,
+)
 from telegram.ext import (
     Application,
     MessageHandler,
     ContextTypes,
     filters,
+    CommandHandler
 )
+
+async def menu_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    menu = update.message.text
+    if menu == '/menu':
+        keyboard = [
+            ["Track my Order"],
+            ["Ask about a Product"],
+            ["Provide a Feedback"]
+        ]
+        reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+        await update.message.reply_text(
+            "Please choose an option:",
+            reply_markup=reply_markup
+        )
+    
 
 async def msg_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     message = update.message.text
@@ -30,7 +49,9 @@ def main():
     tbot_application = Application.builder().token(tbot_token).build()
 
     tbot_application.add_handler(MessageHandler(~filters.COMMAND, msg_handler))
-    tbot_application.add_handler(MessageHandler(filters.COMMAND, cmd_handler))
+    # tbot_application.add_handler(MessageHandler(filters.COMMAND, cmd_handler))
+    tbot_application.add_handler(MessageHandler(filters.COMMAND, menu_handler))
+    tbot_application.add_handler(MessageHandler(filters.Regex("^(Track my Order|Ask about a Product|Provide a Feedback)$"), menu_handler))
 
     tbot_application.run_polling()
 
