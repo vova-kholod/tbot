@@ -12,6 +12,8 @@ from telegram.ext import (
     CommandHandler
 )
 
+from gptconnector import get_response
+
 async def menu_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     menu = update.message.text
     if menu == '/menu':
@@ -30,6 +32,11 @@ async def menu_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 async def msg_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     message = update.message.text
     print(f"Received message: {message}")
+    
+async def msg_llm_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    message = update.message.text
+    reply_text = get_response(message)
+    await update.message.reply_text(reply_text)
 
 async def cmd_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     command = update.message.text
@@ -48,7 +55,8 @@ def main():
 
     tbot_application = Application.builder().token(tbot_token).build()
 
-    tbot_application.add_handler(MessageHandler(~filters.COMMAND, msg_handler))
+    # tbot_application.add_handler(MessageHandler(~filters.COMMAND, msg_handler))
+    tbot_application.add_handler(MessageHandler(~filters.COMMAND, msg_llm_handler))
     # tbot_application.add_handler(MessageHandler(filters.COMMAND, cmd_handler))
     tbot_application.add_handler(MessageHandler(filters.COMMAND, menu_handler))
     tbot_application.add_handler(MessageHandler(filters.Regex("^(Track my Order|Ask about a Product|Provide a Feedback)$"), menu_handler))
